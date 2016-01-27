@@ -93,7 +93,7 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
-      <SubSystem>Windows</SubSystem>
+      <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>libtcod-VS.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>C:\Users\danie\Downloads\programming\c++\roguelike-dev\libtcod;C:\Users\danie\Downloads\programming\c++\roguelike-dev\libtcod\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -148,13 +148,20 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Actor.cpp" />
+    <ClCompile Include="Ai.cpp" />
+    <ClCompile Include="Attacker.cpp" />
+    <ClCompile Include="Destructible.cpp" />
     <ClCompile Include="Engine.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Map.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.hpp" />
+    <ClInclude Include="Ai.hpp" />
+    <ClInclude Include="Attacker.hpp" />
+    <ClInclude Include="Destructible.hpp" />
     <ClInclude Include="Engine.hpp" />
+    <ClInclude Include="main.hpp" />
     <ClInclude Include="Map.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

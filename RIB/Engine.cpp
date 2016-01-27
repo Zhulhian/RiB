@@ -1,14 +1,16 @@
-#include "libtcod.hpp"
-#include "Actor.hpp"
-#include "Map.hpp"
-#include "Engine.hpp"
+#include "main.hpp"
 
-Engine::Engine() {
-	TCODConsole::initRoot(80, 50, "libtcod C++ tutorial", false);
-	player = new Actor(40, 25, '@', TCODColor::white);
+Engine::Engine(int screenWidth, int screenHeight) : gameStatus(STARTUP), fovRadius(40),
+	screenWidth(screenWidth), screenHeight(screenHeight) {
+	TCODConsole::initRoot(screenWidth, screenHeight, "Rogues in Black", false);
+
+	player = new Actor(40, 25, '@', "Player", TCODColor::white);
+	player->destructible = new PlayerDestructible(30, 2, "Your corpse");
+	player->attacker = new Attacker(6);
+	player->ai = new PlayerAi();
+
 	actors.push(player);
-	actors.push(new Actor(60, 13, 'T', TCODColor::yellow));
-	map = new Map(80, 50);
+	map = new Map(110, 80);
 }
 
 Engine::~Engine() {
@@ -17,30 +19,20 @@ Engine::~Engine() {
 }
 
 void Engine::update() {
-	TCOD_key_t key;
-	TCODSystem::checkForEvent(TCOD_EVENT_KEY_PRESS, &key, NULL);
-	switch (key.vk) {
-	case TCODK_UP:
-		if (!map->isWall(player->x, player->y - 1)) {
-			player->y--;
+	if (gameStatus == STARTUP) map->computeFov();
+	gameStatus = IDLE;
+
+	TCODSystem::checkForEvent(TCOD_EVENT_KEY_PRESS, &lastKey, NULL);
+	player->update();
+
+	if (gameStatus == NEW_TURN) {
+		for (Actor **iterator = actors.begin(); iterator != actors.end();
+		iterator++) {
+			Actor *actor = *iterator;
+			if (actor != player) {
+				actor->update();
+			}
 		}
-		break;
-	case TCODK_DOWN:
-		if (!map->isWall(player->x, player->y + 1)) {
-			player->y++;
-		}
-		break;
-	case TCODK_LEFT:
-		if (!map->isWall(player->x - 1, player->y)) {
-			player->x--;
-		}
-		break;
-	case TCODK_RIGHT:
-		if (!map->isWall(player->x + 1, player->y)) {
-			player->x++;
-		}
-		break;
-	default: break;
 	}
 }
 
@@ -51,8 +43,19 @@ void Engine::render() {
 	map->render();
 
 	// Draw the actors:
-	for (Actor **iterator = actors.begin();
-		iterator != actors.end(); iterator++) {
-		(*iterator)->render();
+	for (Actor **iterator = actors.begin(); iterator != actors.end();
+		iterator++) {
+		Actor *actor = *iterator;
+		if (map->isInFov(actor->x, actor->y)) {
+			actor->render();
+		}
 	}
+
+	TCODConsole::root->print(1, screenHeight - 2, "HP: %d/%d",
+		(int)player->destructible->hp, (int)player->destructible->maxHp);
+}
+
+void Engine::sendToBack(Actor *actor) {
+	actors.remove(actor);
+	actors.insertBefore(actor, 0);
 }

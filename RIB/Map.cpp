@@ -1,8 +1,8 @@
-#include "libtcod.hpp"
-#include "Map.hpp"
+#include "main.hpp"
 
 static const int HOUSE_MAX_SIZE = 12;
 static const int HOUSE_MIN_SIZE = 8;
+static const int HOUSE_MAX_ALIENS = 4;
 
 class BspListener : public ITCODBspCallback {
 private:
@@ -13,18 +13,59 @@ public:
 	BspListener(Map &map) : map(map), roomNum(0) {}
 	bool visitNode(TCODBsp *node, void *userData) {
 		if (node->isLeaf()) {
-			int x, y, w, h;
+			int x, y, w, h, door;
 			TCODRandom *rng = TCODRandom::getInstance();
-			w = rng->getInt(HOUSE_MIN_SIZE, node->w - 2);
-			h = rng->getInt(HOUSE_MIN_SIZE, node->h - 2);
-			x = rng->getInt(node->x + 1, node->x + node->w - w - 1);
+			// We subtract 2 from the node size (house size) to ensure they 
+			// do not overlap eachother and that they won't reach the map border.
+			w = rng->getInt(HOUSE_MIN_SIZE, node->w - 2); // Width of room/building
+			h = rng->getInt(HOUSE_MIN_SIZE, node->h - 2); // Height of room/building
 
+			x = rng->getInt(node->x + 1, node->x + node->w - w - 1); // x coord
+			y = rng->getInt(node->y + 1, node->y + node->h - h - 1); // y coord
+
+			door = rng->getInt(1, 4); // Direction of door.
+
+			// Actual creation of building
+			map.createBuilding(roomNum == 0, x, y, x + w - 1, y + h - 1);
+
+			// // // // // // // // // // // // //
+			// Let's create some door openings! //
+			//									//
+			//			   ____2___				//
+			//			  |        |			//
+			//			  |		   |			//
+			//			1 |        | 3			//
+			//			  |		   |			//
+			//			  |________|			//
+			//				   4				//
+			//									//
+			// // // // // // // // // // // // //
+
+			switch (door) {
+			case 1:
+				map.place(true, true, x, y + h / 2, x, y + h / 2);
+				break;
+			case 2:
+				map.place(true, true, x + w / 2, y, x + w / 2, y);
+				break;
+			case 3:
+				map.place(true, true, x + w - 1, y + h / 2, x + w - 1, y + h / 2);
+				break;
+			case 4:
+				map.place(true, true, x + w / 2, y + h - 1, x + w / 2, y + h -1);
+				break;
+			}
+
+			roomNum++;
 		}
+		return true;
 	}
 };
 
 Map::Map(int width, int height) : width(width), height(height) {
 	tiles = new Tile[width*height];
+	map = new TCODMap(width, height);
+	map->clear(true, true);
 	TCODBsp bsp(0, 0, width, height);
 	bsp.splitRecursive(NULL, 8, HOUSE_MAX_SIZE, HOUSE_MAX_SIZE, 1.5f, 1.5f);
 	BspListener listener(*this);
@@ -32,10 +73,55 @@ Map::Map(int width, int height) : width(width), height(height) {
 }
 
 Map::~Map() {
-	delete[] tiles;
+	delete [] tiles;
+	delete map;
 }
 
-void Map::place(bool walkable, int x1, int y1, int x2, int y2) {
+void Map::addAlien(int x, int y) {
+	TCODRandom *rng = TCODRandom::getInstance();
+	int alienSelection = rng->getInt(0, 100);
+
+	if (alienSelection < 30) {
+		Actor *slogburth = new Actor(x, y, 'S', "Slogburth", TCODColor::azure);
+		slogburth->destructible = new EnemyDestructible(8, 3, "pungent slimy mess");
+		slogburth->attacker = new Attacker(3);
+		slogburth->ai = new EnemyAi();
+		engine.actors.push(slogburth);
+	}
+	else if (alienSelection > 30 && alienSelection < 50) {
+		Actor *chloropod = new Actor(x, y, 'C', "Chloropod", TCODColor::darkCrimson);
+		chloropod->destructible = new EnemyDestructible(12, 1, "pile of legs and goo");
+		chloropod->attacker = new Attacker(4);
+		chloropod->ai = new EnemyAi();
+		engine.actors.push(chloropod);
+	}
+	else /*if (alienSelection > 50 && alienSelection < 70)*/{
+		Actor *klamarian = new Actor(x, y, 'K', "Klaramarian", TCODColor::yellow);
+		klamarian->destructible = new EnemyDestructible(7, 4, "yellow klamarian corpse");
+		klamarian->attacker = new Attacker(5);
+		klamarian->ai = new EnemyAi();
+		engine.actors.push(klamarian);
+	}
+	/*
+	else if (alienSelection > 70 && alienSelection < 80) {
+		engine.actors.push(new Actor(x, y, 'O', "Octi-ape", TCODColor::copper));
+	}
+	else if (alienSelection == 30) {
+		engine.actors.push(new Actor(x, y, 'Q', "Quantum Weather Butterfly", TCODColor::purple));
+	}
+	else if (alienSelection == 50) {
+		engine.actors.push(new Actor(x, y, 'A', "Atraxi Officer", TCODColor::white));
+	}
+	else if (alienSelection == 70) {
+		engine.actors.push(new Actor(x, y, 'T', "Time Lord", TCODColor::desaturatedSky));
+	}
+	else {
+		engine.actors.push(new Actor(x, y, 'Y', "Yaka", TCODColor::lighterGrey));
+	}
+	*/
+}
+
+void Map::place(bool transparent, bool walkable, int x1, int y1, int x2, int y2) {
 	if (x2 < x1) {
 		int tmp = x2;
 		x2 = x1;
@@ -48,38 +134,85 @@ void Map::place(bool walkable, int x1, int y1, int x2, int y2) {
 	}
 	for (int tilex = x1; tilex <= x2; tilex++) {
 		for (int tiley = y1; tiley <= y2; tiley++) {
-			tiles[tilex + tiley * width].canWalk = walkable;
+			map->setProperties(tilex, tiley, transparent, walkable);
 		}
 	}
 }
 
 void Map::createBuilding(bool first, int x1, int y1, int x2, int y2) {
-	place(false, x1, y1, x2, y2);
-	place(true, x1 + 1, y1 + 1, x2 - 1, y2 - 1);
+	place(false, false, x1, y1, x2, y2);
+	place(true, true, x1 + 1, y1 + 1, x2 - 1, y2 - 1);
 	if (first) {
 		engine.player->x = (x1 + x2) / 2;
 		engine.player->y = (y1 + y2) / 2;
 	}
 	else {
 		TCODRandom *rng = TCODRandom::getInstance();
-		if (rng->getInt(0, 3) == 0) {
-			engine.actors.push(new Actor((x1 + x2) / 2, (y1 + y2) / 2, 'A', TCODColor::amber));
+		int nbMonsters = rng->getInt(0, HOUSE_MAX_ALIENS);
+		while (nbMonsters > 0) {
+			int x = rng->getInt(x1, x2);
+			int y = rng->getInt(y1, y2);
+
+			if (canWalk(x, y)) {
+				addAlien(x, y);
+			}
+			nbMonsters--;
 		}
 	}
 }
 
+bool Map::canWalk(int x, int y) const {
+	if (isWall(x, y)) {
+		return false;
+	}
+	for (Actor **iterator = engine.actors.begin();
+	iterator != engine.actors.end(); iterator++) {
+		Actor *actor = *iterator;
+		if (actor->blocks && actor->x == x && actor->y == y) {
+			return false;
+		}
+	}
+	return true;
+}
+
 bool Map::isWall(int x, int y) const {
-	return !tiles[x + y*width].canWalk;
+	return !map->isWalkable(x, y);
+}
+
+bool Map::isExplored(int x, int y) const {
+	return tiles[x + y*width].explored;
+}
+
+bool Map::isInFov(int x, int y) const {
+	if (map->isInFov(x, y)) {
+		tiles[x + y*width].explored = true;
+		return true;
+	}
+	return false;
+}
+
+void Map::computeFov() {
+	map->computeFov(engine.player->x, engine.player->y,
+		engine.fovRadius);
 }
 
 void Map::render() const {
-	static const TCODColor darkWall(0, 0, 100);
-	static const TCODColor darkGround(50, 50, 150);
+	static const TCODColor lightWall(173, 173, 173);
+	static const TCODColor lightGround(90, 170, 80);
+
+	static const TCODColor darkWall(153, 153, 153);
+	static const TCODColor darkGround(50, 130, 40);
 
 	for (int x = 0; x < width; x++) {
 		for (int y = 0; y < height; y++) {
-			TCODConsole::root->setCharBackground(x, y,
-				isWall(x, y) ? darkWall : darkGround);
+			if (isInFov(x, y)) {
+				TCODConsole::root->setCharBackground(x, y,
+					isWall(x, y) ? lightWall : lightGround);
+			}
+			else if (isExplored(x, y)) {
+				TCODConsole::root->setCharBackground(x, y,
+					isWall(x, y) ? darkWall : darkGround);
+			}
 		}
 	}
 }

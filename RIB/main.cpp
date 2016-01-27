@@ -1,12 +1,8 @@
-#include <cstdio>
-#include "libtcod.hpp"
-#include "Actor.hpp"
-#include "Map.hpp"
-#include "Engine.hpp"
+#include "main.hpp"
 
-#pragma comment(linker, "/SUBSYSTEM:windows /ENTRY:mainCRTStartup")
+//#pragma comment(linker, "/SUBSYSTEM:windows /ENTRY:mainCRTStartup")
 
-Engine engine;
+Engine engine(110, 80);
 
 int main() {
 	while (!TCODConsole::isWindowClosed()) {
