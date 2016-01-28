@@ -41,12 +41,12 @@ void Destructible::die(Actor *owner) {
 
 void EnemyDestructible::die(Actor *owner) {
 	// Transform it into a corpse!
-	printf("The %s is dead. \n", owner->name);
+	engine.gui->message(TCODColor::lightGrey, "The %s is dead. \n", owner->name);
 	Destructible::die(owner);
 }
 
 void PlayerDestructible::die(Actor *owner) {
-	printf("You have met your end. \n");
+	engine.gui->message(TCODColor::red, "You have met your end. \n");
 	Destructible::die(owner);
 	engine.gameStatus = Engine::DEFEAT;
 }

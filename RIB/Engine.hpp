@@ -3,6 +3,7 @@ public :
 	TCODList<Actor *> actors;
 	Actor *player;
 	Map *map;
+	Gui *gui;
 
 	Engine(int screenWidth, int screenHeight);
 	~Engine();
@@ -16,6 +17,7 @@ public :
 	int screenHeight;
 
 	TCOD_key_t lastKey;
+	TCOD_mouse_t mouse;
 
 	enum gameStatus {
 		STARTUP,

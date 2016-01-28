@@ -152,6 +152,7 @@
     <ClCompile Include="Attacker.cpp" />
     <ClCompile Include="Destructible.cpp" />
     <ClCompile Include="Engine.cpp" />
+    <ClCompile Include="Gui.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Map.cpp" />
   </ItemGroup>
@@ -161,6 +162,7 @@
     <ClInclude Include="Attacker.hpp" />
     <ClInclude Include="Destructible.hpp" />
     <ClInclude Include="Engine.hpp" />
+    <ClInclude Include="Gui.hpp" />
     <ClInclude Include="main.hpp" />
     <ClInclude Include="Map.hpp" />
   </ItemGroup>

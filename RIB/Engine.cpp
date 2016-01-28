@@ -11,18 +11,23 @@ Engine::Engine(int screenWidth, int screenHeight) : gameStatus(STARTUP), fovRadi
 
 	actors.push(player);
 	map = new Map(110, 80);
+	gui = new Gui();
+
+	gui->message(TCODColor::flame,
+		"You open your eyes. You are in an \n building. Something feels wrong.");
 }
 
 Engine::~Engine() {
 	actors.clearAndDelete();
 	delete map;
+	delete gui;
 }
 
 void Engine::update() {
 	if (gameStatus == STARTUP) map->computeFov();
 	gameStatus = IDLE;
 
-	TCODSystem::checkForEvent(TCOD_EVENT_KEY_PRESS, &lastKey, NULL);
+	TCODSystem::checkForEvent(TCOD_EVENT_KEY_PRESS | TCOD_EVENT_MOUSE, &lastKey, &mouse);
 	player->update();
 
 	if (gameStatus == NEW_TURN) {
@@ -50,6 +55,9 @@ void Engine::render() {
 			actor->render();
 		}
 	}
+
+	player->render();
+	gui->render();
 
 	TCODConsole::root->print(1, screenHeight - 2, "HP: %d/%d",
 		(int)player->destructible->hp, (int)player->destructible->maxHp);
