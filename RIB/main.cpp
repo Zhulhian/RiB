@@ -2,7 +2,7 @@
 
 //#pragma comment(linker, "/SUBSYSTEM:windows /ENTRY:mainCRTStartup")
 
-Engine engine(125, 80);
+Engine engine(145, 80);
 
 int main() {
 	while (!TCODConsole::isWindowClosed()) {

@@ -13,8 +13,8 @@ Engine::Engine(int screenWidth, int screenHeight) : gameStatus(STARTUP), fovRadi
 	map = new Map(110, 80);
 	gui = new Gui();
 
-	gui->message(TCODColor::flame,
-		"You open your eyes. You are in an \n building. Something feels wrong.");
+	gui->message(TCODColor::lighterGreen,
+		"You open your eyes. You are in an building. Something feels wrong.");
 }
 
 Engine::~Engine() {
@@ -57,10 +57,7 @@ void Engine::render() {
 	}
 
 	player->render();
-	gui->render();
-
-	TCODConsole::root->print(1, screenHeight - 2, "HP: %d/%d",
-		(int)player->destructible->hp, (int)player->destructible->maxHp);
+	gui->render(); 
 }
 
 void Engine::sendToBack(Actor *actor) {

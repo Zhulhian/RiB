@@ -3,7 +3,6 @@ public :
 	TCODList<Actor *> actors;
 	Actor *player;
 	Map *map;
-	Gui *gui;
 
 	Engine(int screenWidth, int screenHeight);
 	~Engine();
@@ -26,6 +25,8 @@ public :
 		VICTORY,
 		DEFEAT
 	} gameStatus;
+
+	Gui *gui;
 };
 
 extern Engine engine;
