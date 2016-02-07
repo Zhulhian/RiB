@@ -3,6 +3,7 @@
 static const int HOUSE_MAX_SIZE = 12;
 static const int HOUSE_MIN_SIZE = 8;
 static const int HOUSE_MAX_ALIENS = 4;
+static const int MAX_HOUSE_ITEMS = 2;
 
 class BspListener : public ITCODBspCallback {
 private:
@@ -77,6 +78,14 @@ Map::~Map() {
 	delete map;
 }
 
+void Map::addItem(int x, int y) {
+	Actor *healingCap = new Actor(x, y, '\07', "healing capsule", TCODColor::lightRed);
+
+	healingCap->blocks = false;
+	healingCap->pickable = new Healer(4);
+	engine.actors.push(healingCap);
+}
+
 void Map::addAlien(int x, int y) {
 	TCODRandom *rng = TCODRandom::getInstance();
 	int alienSelection = rng->getInt(0, 100);
@@ -142,6 +151,7 @@ void Map::place(bool transparent, bool walkable, int x1, int y1, int x2, int y2)
 void Map::createBuilding(bool first, int x1, int y1, int x2, int y2) {
 	place(false, false, x1, y1, x2, y2);
 	place(true, true, x1 + 1, y1 + 1, x2 - 1, y2 - 1);
+	
 	if (first) {
 		engine.player->x = (x1 + x2) / 2;
 		engine.player->y = (y1 + y2) / 2;
@@ -157,6 +167,16 @@ void Map::createBuilding(bool first, int x1, int y1, int x2, int y2) {
 				addAlien(x, y);
 			}
 			nbMonsters--;
+		}
+
+		int nbItems = rng->getInt(0, MAX_HOUSE_ITEMS);
+		while (nbItems > 0) {
+			int x = rng->getInt(x1, x2);
+			int y = rng->getInt(y1, y2);
+			if (canWalk(x, y)) {
+				addItem(x, y);
+			}
+			nbItems--;
 		}
 	}
 }
@@ -201,21 +221,51 @@ void Map::computeFov() {
 }
 
 void Map::render() const {
-	static const TCODColor lightWall(173, 173, 173);
-	static const TCODColor lightGround(90, 170, 80);
+	static const TCODColor lightWallBg(173, 173, 173);
+	static const TCODColor lightGroundBg = TCODColor::darkSea;//(90, 170, 80);
+	
+	static const TCODColor lightWallFg(183, 183, 183);
+	static const TCODColor lightGroundFg(113, 193, 103);
 
-	static const TCODColor darkWall(153, 153, 153);
-	static const TCODColor darkGround(50, 130, 40);
+	static const TCODColor darkWallBg(153, 153, 153);
+	static const TCODColor darkGroundBg = TCODColor::darkerSea;//(50, 130, 40);
+
+	static const TCODColor darkWallFg(163, 163, 163);
+	static const TCODColor darkGroundFg(60, 140, 50);
 
 	for (int x = 0; x < width; x++) {
 		for (int y = 0; y < height; y++) {
 			if (isInFov(x, y)) {
-				TCODConsole::root->setCharBackground(x, y,
-					isWall(x, y) ? lightWall : lightGround);
+				if (isWall(x, y)) {
+					TCODConsole::root->setCharBackground(x, y,
+						lightWallBg);
+					TCODConsole::root->setCharForeground(x, y,
+						lightWallFg);
+					TCODConsole::root->setChar(x, y, tiles[x + y * width].ch = TCOD_CHAR_BLOCK1);
+				}
+				else {
+					TCODConsole::root->setCharBackground(x, y,
+						lightGroundBg);
+					TCODConsole::root->setCharForeground(x, y,
+						lightGroundFg);
+					TCODConsole::root->setChar(x, y, tiles[x + y * width].ch = '\159');
+				}
 			}
 			else if (isExplored(x, y)) {
-				TCODConsole::root->setCharBackground(x, y,
-					isWall(x, y) ? darkWall : darkGround);
+				if (isWall(x, y)) {
+					TCODConsole::root->setCharBackground(x, y,
+						darkWallBg);
+					TCODConsole::root->setCharForeground(x, y,
+						darkWallFg);
+					TCODConsole::root->setChar(x, y, tiles[x + y * width].ch = '\112');
+				}
+				else {
+					TCODConsole::root->setCharBackground(x, y,
+						darkGroundBg);
+					TCODConsole::root->setCharForeground(x, y,
+						darkGroundFg);
+					TCODConsole::root->setChar(x, y, tiles[x + y * width].ch = '\159');
+				}
 			}
 		}
 	}

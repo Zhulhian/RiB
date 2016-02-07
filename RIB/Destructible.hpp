@@ -9,6 +9,7 @@ public:
 
 	inline bool isDead() { return hp <= 0; }
 	float takeDamage(Actor *owner, float damage);
+	float heal(float amount);
 
 	virtual void die(Actor *owner);
 };

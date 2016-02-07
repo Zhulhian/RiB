@@ -2,19 +2,20 @@
 
 Engine::Engine(int screenWidth, int screenHeight) : gameStatus(STARTUP), fovRadius(40),
 	screenWidth(screenWidth), screenHeight(screenHeight) {
-	TCODConsole::initRoot(screenWidth, screenHeight, "Rogues in Black", false);
+	TCODConsole::initRoot(screenWidth, screenHeight, "TelOps", false);
 
-	player = new Actor(40, 25, '@', "Player", TCODColor::white);
+	player = new Actor(40, 25, '@', "Player", TCODColor::black);
 	player->destructible = new PlayerDestructible(30, 2, "Your corpse");
 	player->attacker = new Attacker(6);
 	player->ai = new PlayerAi();
+	player->container = new Container(10);
 
 	actors.push(player);
-	map = new Map(110, 80);
+	
+	map = new Map(screenWidth - PANEL_WIDTH, 80);
 	gui = new Gui();
-
-	gui->message(TCODColor::lighterGreen,
-		"You open your eyes. You are in an building. Something feels wrong.");
+	gui->message(TCODColor::amber,
+		"You have been deployed in the suburbs. Your goal is to eliminate the extraterrestial threat.");
 }
 
 Engine::~Engine() {

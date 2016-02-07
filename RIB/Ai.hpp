@@ -8,7 +8,10 @@ public:
 	void update(Actor *owner);
 
 protected:
+	Actor *choseFromInventory(Actor *owner);
 	bool moveOrAttack(Actor *owner, int targetx, int targety);
+	void handleActionKey(Actor *owner, int ascii);
+	void showHelp();
 };
 
 class EnemyAi : public Ai {

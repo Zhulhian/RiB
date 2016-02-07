@@ -3,18 +3,17 @@
 #include <string>
 #include "main.hpp"
 
-static const int PANEL_WIDTH = 35;
-
-static const int BAR_WIDTH = 30;
-static const int BAR_X = (PANEL_WIDTH - BAR_WIDTH) / 2 + 1;
-static const int BAR_Y = 2;
+static const int BAR_WIDTH = PANEL_WIDTH - 4;
+static const int BAR_X = (PANEL_WIDTH - BAR_WIDTH) / 2;
+static const int BAR_Y = 3;
 
 //static const int MSG_X = (PANEL_WIDTH - MSG_WIDTH) / 2 + 1;
+static const int MSG_Y = BAR_Y + 2;
 
 // We subtract by 3 because we want one tile of free space at each side
 // of the message, and we subtract one more because of the border, which
 // takes up one tile.
-static const char MSG_WIDTH = PANEL_WIDTH - 3;
+static const char MSG_WIDTH = PANEL_WIDTH - 4;
 
 
 Gui::Gui() {
@@ -32,7 +31,9 @@ void Gui::render() {
 	con->clear();
 	
 	// Render the border
-	renderBorder('#', TCODColor::grey);
+	//renderBorder('#', TCODColor::grey);
+	con->setDefaultForeground(TCODColor::amber);
+	con->printFrame(0, 0, PANEL_WIDTH, engine.screenHeight, true, TCOD_BKGND_DEFAULT, "S T A T U S");
 	
 	// Render the health bar to the GUI console.
 	renderBar(BAR_X, BAR_Y, BAR_WIDTH, "HP", engine.player->destructible->hp,
@@ -40,15 +41,17 @@ void Gui::render() {
 		TCODColor::lighterRed, TCODColor::lightRed);
 
 	// Render the message log
-	int y = engine.screenHeight - getMessageHeight();
-	float colorCoef = 0.4f;
+	int y = MSG_Y;
+	float colorCoef = 0.8f;
+
 	for (Message **it = log.begin(); it != log.end(); it++) {
 		Message *message = *it;
+
 		con->setDefaultForeground(message->col * colorCoef);
 		con->printRect(2, y, MSG_WIDTH, getMessageHeight(), message->text);
 		y += con->getHeightRect(2, y, MSG_WIDTH, getMessageHeight(), message->text);
 		if (colorCoef < 1.0f) {
-			colorCoef += 0.3f;
+			colorCoef += 0.2f;
 		}
 	}
 
@@ -59,16 +62,16 @@ void Gui::render() {
 		TCODConsole::root, engine.screenWidth - PANEL_WIDTH, 0);
 }
 
-void Gui::renderBorder(int symbol, const TCODColor &borderColor) {
-	con->setDefaultForeground(borderColor);
-	for (int y = 0; y <= engine.screenHeight; y++) {
-		con->setChar(0, y, symbol);
-		con->setCharForeground(0, y, borderColor);
-	}
-}
+//void Gui::renderBorder(int symbol, const TCODColor &borderColor) {
+//	con->setDefaultForeground(borderColor);
+//	for (int y = 0; y <= engine.screenHeight; y++) {
+//		con->setChar(0, y, symbol);
+//		con->setCharForeground(0, y, borderColor);
+//	}
+//}
 
 int Gui::getMessageHeight() {
-	return (int)(engine.screenHeight / 2);
+	return (int)(engine.screenHeight / 3);
 }
 
 void Gui::renderBar(int x, int y, int width, const char *name,
@@ -90,7 +93,7 @@ void Gui::renderBar(int x, int y, int width, const char *name,
 	con->setDefaultForeground(TCODColor::red);
 	con->setDefaultBackground(TCODColor::lighterRed);
 	con->printEx((x + width / 2) , y - 1, TCOD_BKGND_SET, TCOD_CENTER,
-		"+ %s: %g/%g +", name, value, maxValue);
+		"+ %g/%g +", value, maxValue);
 }
 
 Gui::Message::Message(const char *text, const TCODColor &col) :

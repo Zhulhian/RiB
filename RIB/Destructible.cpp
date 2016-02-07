@@ -19,6 +19,7 @@ float Destructible::takeDamage(Actor *owner, float damage) {
 	if (damage > 0) {
 		hp -= damage;
 		if (hp <= 0) {
+			hp = 0;
 			die(owner);
 		}
 	}
@@ -28,10 +29,19 @@ float Destructible::takeDamage(Actor *owner, float damage) {
 	return damage;
 }
 
+float Destructible::heal(float amount) {
+	hp += amount;
+	if (hp > maxHp) {
+		amount -= hp - maxHp;
+		hp = maxHp;
+	}
+	return amount;
+}
+
 void Destructible::die(Actor *owner) {
 	// Transform the actor into a corpse! Yay!
 	owner->ch = '%';
-	owner->col = TCODColor::lightRed;
+	owner->col = owner->col * 0.85f;
 	owner->name = corpseName;
 	owner->blocks = false;
 
@@ -41,12 +51,12 @@ void Destructible::die(Actor *owner) {
 
 void EnemyDestructible::die(Actor *owner) {
 	// Transform it into a corpse!
-	engine.gui->message(TCODColor::lightGrey, "The %s is dead.", owner->name);
+	engine.gui->message(TCODColor::lightestGrey, "+ The %s is dead. +", owner->name);
 	Destructible::die(owner);
 }
 
 void PlayerDestructible::die(Actor *owner) {
-	engine.gui->message(TCODColor::red, "You have met your end.");
+	engine.gui->message(TCODColor::red, "+ You have met your end. +");
 	Destructible::die(owner);
 	engine.gameStatus = Engine::DEFEAT;
 }
