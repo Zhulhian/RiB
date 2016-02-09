@@ -15,7 +15,7 @@ public:
 	Pickable *pickable; // Something that can be picked up and used.
 	Container *container; // Something that can contain / A c t o r s /.
 
-	Actor(int x, int y, int ch, const char *name, const TCODColor &colFg, const TCODColor &colBg = TCODConsole::root->getDefaultBackground());
+	Actor(int x, int y, int ch, const char *name, const TCODColor &colFg, const TCODColor &colBg = TCODColor::amber);
 	~Actor();
 
 	void update();

@@ -13,7 +13,7 @@ Engine::Engine(int screenWidth, int screenHeight) : gameStatus(STARTUP), fovRadi
 
 	actors.push(player);
 	
-	map = new Map(screenWidth - PANEL_WIDTH, 80);
+	map = new Map(screenWidth - PANEL_WIDTH, screenHeight);
 	gui = new Gui();
 	gui->message(TCODColor::azure,
 		"You have been deployed in the suburbs. Your goal is to eliminate the extraterrestial threat.");
