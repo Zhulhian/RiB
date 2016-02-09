@@ -3,9 +3,11 @@ public:
 	int x, y;			// Position on map
 	int ch;				// ASCII code in INT form
 	const char *name;	// Name
-	TCODColor col;		// Color
+	TCODColor colFg;	// Color
+	TCODColor colBg;
 
 	bool blocks;
+	bool dead;
 
 	Attacker *attacker; // Something that can attack.
 	Destructible *destructible; // Something that can die.
@@ -13,7 +15,7 @@ public:
 	Pickable *pickable; // Something that can be picked up and used.
 	Container *container; // Something that can contain / A c t o r s /.
 
-	Actor(int x, int y, int ch, const char *name, const TCODColor &col);
+	Actor(int x, int y, int ch, const char *name, const TCODColor &colFg, const TCODColor &colBg = TCODConsole::root->getDefaultBackground());
 	~Actor();
 
 	void update();

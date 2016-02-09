@@ -32,7 +32,7 @@ void Gui::render() {
 	
 	// Render the border
 	//renderBorder('#', TCODColor::grey);
-	con->setDefaultForeground(TCODColor::amber);
+	con->setDefaultForeground(TCODColor::azure);
 	con->printFrame(0, 0, PANEL_WIDTH, engine.screenHeight, true, TCOD_BKGND_DEFAULT, "S T A T U S");
 	
 	// Render the health bar to the GUI console.
@@ -153,6 +153,7 @@ void Gui::renderMouseLook() {
 	bool first = true;
 
 	TCODColor mouseTargetColor;
+
 	int descriptx = engine.mouse.cx;
 	int descripty = engine.mouse.cy;
 
@@ -167,7 +168,7 @@ void Gui::renderMouseLook() {
 				first = false;
 			}
 			strcat(buf, actor->name);
-			mouseTargetColor = actor->col;
+			mouseTargetColor = actor->colFg;
 		}
 	}
 	

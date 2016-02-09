@@ -48,6 +48,9 @@
     <ClCompile Include="Pickable.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Spritesheet.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Pickable.hpp">
@@ -82,6 +85,9 @@
     </ClInclude>
     <ClInclude Include="Ai.hpp">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Spritesheet.hpp">
+      <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

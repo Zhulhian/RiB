@@ -1,5 +1,7 @@
 #include "libtcod.hpp"
 class Actor;
+#include <tuple>
+#include "Spritesheet.hpp"
 #include "Destructible.hpp"
 #include "Attacker.hpp"
 #include "Ai.hpp"

@@ -4,8 +4,9 @@ public:
 	float hp;
 	float defense;
 	const char *corpseName;
+	int corpseTile;
 
-	Destructible(float maxHp, float defense, const char *corpseName);
+	Destructible(float maxHp, float defense, const char *corpseName, int corpseTile);
 
 	inline bool isDead() { return hp <= 0; }
 	float takeDamage(Actor *owner, float damage);
@@ -16,12 +17,18 @@ public:
 
 class EnemyDestructible : public Destructible {
 public: 
-	EnemyDestructible(float maxHp, float defense, const char *corpseName);
+	EnemyDestructible(float maxHp, float defense, const char *corpseName, int corpseTile);
 	void die(Actor *owner);
 };
 
 class PlayerDestructible : public Destructible {
 public:
-	PlayerDestructible(float maxHp, float defense, const char *corpseName);
+	PlayerDestructible(float maxHp, float defense, const char *corpseName, int corpseTile);
+	void die(Actor *owner);
+};
+
+class ObjectDestructible : public Destructible {
+public:
+	ObjectDestructible(float maxHp, float defense, const char *brokenName, int brokenTile);
 	void die(Actor *owner);
 };

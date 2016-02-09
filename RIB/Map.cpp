@@ -1,9 +1,22 @@
-#include "main.hpp"
+﻿#include "main.hpp"
 
 static const int HOUSE_MAX_SIZE = 12;
 static const int HOUSE_MIN_SIZE = 8;
 static const int HOUSE_MAX_ALIENS = 4;
 static const int MAX_HOUSE_ITEMS = 2;
+
+static const int DOOR_HORIZ = '-';
+static const int DOOR_VERT = '|';
+static const int FLOOR = 240;
+static const int WALL = '#';
+static const int GRASS = '"';
+static const int HEAL_CAP = '\07';
+
+//static const TCODColor lightGroundBg = TCODColor::darkTurquoise;//(90, 170, 80);
+
+//static const TCODColor lightGroundFg = lightGroundBg * 1.1f;
+
+
 
 class BspListener : public ITCODBspCallback {
 private:
@@ -42,20 +55,39 @@ public:
 			//									//
 			// // // // // // // // // // // // //
 
+			int doorX = 0;
+			int doorY = 0;
+			int doorCh = '\0';
+
 			switch (door) {
 			case 1:
-				map.place(true, true, x, y + h / 2, x, y + h / 2);
+				map.place(true, true, x, y + h / 2, x, y + h / 2, FLOOR, TCODColor::sepia, TCODColor::darkerSepia);
+				doorX = x;
+				doorY = y + h / 2;
+				doorCh = DOOR_VERT;
 				break;
 			case 2:
-				map.place(true, true, x + w / 2, y, x + w / 2, y);
+				map.place(true, true, x + w / 2, y, x + w / 2, y, FLOOR, TCODColor::sepia, TCODColor::darkerSepia);
+				doorX = x + w / 2;
+				doorY = y;
+				doorCh = DOOR_HORIZ;
 				break;
 			case 3:
-				map.place(true, true, x + w - 1, y + h / 2, x + w - 1, y + h / 2);
+				map.place(true, true, x + w - 1, y + h / 2, x + w - 1, y + h / 2, FLOOR, TCODColor::sepia, TCODColor::darkerSepia);
+				doorX = x + w - 1;
+				doorY = y + h / 2;
+				doorCh = DOOR_VERT;
 				break;
 			case 4:
-				map.place(true, true, x + w / 2, y + h - 1, x + w / 2, y + h -1);
+				map.place(true, true, x + w / 2, y + h - 1, x + w / 2, y + h -1, FLOOR, TCODColor::sepia, TCODColor::darkerSepia);
+				doorX = x + w / 2;
+				doorY = y + h - 1;
+				doorCh = DOOR_HORIZ;
 				break;
 			}
+			Actor *doorObj = new Actor(doorX, doorY, doorCh, "Door", TCODColor::darkerSepia);
+			doorObj->destructible = new ObjectDestructible(3, 3, "broken door", '}');
+			engine.actors.push(doorObj);
 
 			roomNum++;
 		}
@@ -79,7 +111,7 @@ Map::~Map() {
 }
 
 void Map::addItem(int x, int y) {
-	Actor *healingCap = new Actor(x, y, '\07', "healing capsule", TCODColor::lightRed);
+	Actor *healingCap = new Actor(x, y, HEAL_CAP, "healing capsule", TCODColor::lightRed);
 
 	healingCap->blocks = false;
 	healingCap->pickable = new Healer(4);
@@ -92,21 +124,21 @@ void Map::addAlien(int x, int y) {
 
 	if (alienSelection < 30) {
 		Actor *slogburth = new Actor(x, y, 'S', "Slogburth", TCODColor::azure);
-		slogburth->destructible = new EnemyDestructible(8, 3, "pungent slimy mess");
+		slogburth->destructible = new EnemyDestructible(8, 3, "pungent slimy mess", 166);
 		slogburth->attacker = new Attacker(3);
 		slogburth->ai = new EnemyAi();
 		engine.actors.push(slogburth);
 	}
 	else if (alienSelection > 30 && alienSelection < 50) {
 		Actor *chloropod = new Actor(x, y, 'C', "Chloropod", TCODColor::darkCrimson);
-		chloropod->destructible = new EnemyDestructible(12, 1, "pile of legs and goo");
+		chloropod->destructible = new EnemyDestructible(12, 1, "pile of legs and goo", 158);
 		chloropod->attacker = new Attacker(4);
 		chloropod->ai = new EnemyAi();
 		engine.actors.push(chloropod);
 	}
 	else /*if (alienSelection > 50 && alienSelection < 70)*/{
 		Actor *klamarian = new Actor(x, y, 'K', "Klaramarian", TCODColor::yellow);
-		klamarian->destructible = new EnemyDestructible(7, 4, "yellow klamarian corpse");
+		klamarian->destructible = new EnemyDestructible(7, 4, "yellow klamarian corpse", 172);
 		klamarian->attacker = new Attacker(5);
 		klamarian->ai = new EnemyAi();
 		engine.actors.push(klamarian);
@@ -130,7 +162,7 @@ void Map::addAlien(int x, int y) {
 	*/
 }
 
-void Map::place(bool transparent, bool walkable, int x1, int y1, int x2, int y2) {
+void Map::place(bool transparent, bool walkable, int x1, int y1, int x2, int y2, char tileType, TCODColor colBg, TCODColor colFg) {
 	if (x2 < x1) {
 		int tmp = x2;
 		x2 = x1;
@@ -144,13 +176,24 @@ void Map::place(bool transparent, bool walkable, int x1, int y1, int x2, int y2)
 	for (int tilex = x1; tilex <= x2; tilex++) {
 		for (int tiley = y1; tiley <= y2; tiley++) {
 			map->setProperties(tilex, tiley, transparent, walkable);
+			tiles[tilex + tiley * width].ch = tileType;
+			tiles[tilex + tiley * width].colBg = colBg;
+			tiles[tilex + tiley * width].colFg = colFg;
 		}
 	}
 }
 
 void Map::createBuilding(bool first, int x1, int y1, int x2, int y2) {
-	place(false, false, x1, y1, x2, y2);
-	place(true, true, x1 + 1, y1 + 1, x2 - 1, y2 - 1);
+	static const TCODColor lightWallBg(186, 186, 186);
+	static const TCODColor lightWallFg(160, 160, 160);
+
+
+	static const TCODColor lightFloorBg = TCODColor::sepia; 
+	static const TCODColor lightFloorFg = TCODColor::brass;
+
+
+	place(false, false, x1, y1, x2, y2, WALL, lightWallBg, lightWallFg);
+	place(true, true, x1 + 1, y1 + 1, x2 - 1, y2 - 1, FLOOR, lightFloorBg, lightFloorFg);
 	
 	if (first) {
 		engine.player->x = (x1 + x2) / 2;
@@ -221,52 +264,17 @@ void Map::computeFov() {
 }
 
 void Map::render() const {
-	static const TCODColor lightWallBg(173, 173, 173);
-	static const TCODColor lightGroundBg = TCODColor::darkSea;//(90, 170, 80);
-	
-	static const TCODColor lightWallFg(183, 183, 183);
-	static const TCODColor lightGroundFg(113, 193, 103);
-
-	static const TCODColor darkWallBg(153, 153, 153);
-	static const TCODColor darkGroundBg = TCODColor::darkerSea;//(50, 130, 40);
-
-	static const TCODColor darkWallFg(163, 163, 163);
-	static const TCODColor darkGroundFg(60, 140, 50);
-
 	for (int x = 0; x < width; x++) {
 		for (int y = 0; y < height; y++) {
+			Tile tile = tiles[x + y * width];
+
 			if (isInFov(x, y)) {
-				if (isWall(x, y)) {
-					TCODConsole::root->setCharBackground(x, y,
-						lightWallBg);
-					TCODConsole::root->setCharForeground(x, y,
-						lightWallFg);
-					TCODConsole::root->setChar(x, y, tiles[x + y * width].ch = TCOD_CHAR_BLOCK1);
-				}
-				else {
-					TCODConsole::root->setCharBackground(x, y,
-						lightGroundBg);
-					TCODConsole::root->setCharForeground(x, y,
-						lightGroundFg);
-					TCODConsole::root->setChar(x, y, tiles[x + y * width].ch = '\159');
-				}
+				TCODConsole::root->putCharEx(x, y, tile.ch, tile.colFg, tile.colBg);
 			}
 			else if (isExplored(x, y)) {
-				if (isWall(x, y)) {
-					TCODConsole::root->setCharBackground(x, y,
-						darkWallBg);
-					TCODConsole::root->setCharForeground(x, y,
-						darkWallFg);
-					TCODConsole::root->setChar(x, y, tiles[x + y * width].ch = '\112');
-				}
-				else {
-					TCODConsole::root->setCharBackground(x, y,
-						darkGroundBg);
-					TCODConsole::root->setCharForeground(x, y,
-						darkGroundFg);
-					TCODConsole::root->setChar(x, y, tiles[x + y * width].ch = '\159');
-				}
+				TCODConsole::root->putCharEx(x, y, tile.ch, tile.colFg * 0.76f, tile.colBg * 0.76f);
 			}
+			
 		}
 	}
 }

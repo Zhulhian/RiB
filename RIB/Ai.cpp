@@ -74,7 +74,7 @@ bool PlayerAi::moveOrAttack(Actor *owner, int targetx, int targety) {
 			|| actor->pickable;
 		if (corpseOrItem
 			&& actor->x == targetx && actor->y == targety) {
-			engine.gui->message(actor->col, "There's a %s lying here.", actor->name);
+			engine.gui->message(actor->colFg, "There's a %s lying here.", actor->name);
 		}
 	}
 	owner->x = targetx;
@@ -100,7 +100,7 @@ Actor *PlayerAi::choseFromInventory(Actor *owner) {
 	for (Actor **it = owner->container->inventory.begin();
 	it != owner->container->inventory.end(); it++) {
 		Actor *actor = *it;
-		TCODConsole::setColorControl(TCOD_COLCTRL_1, actor->col, TCODColor::black);
+		TCODConsole::setColorControl(TCOD_COLCTRL_1, actor->colFg, TCODColor::black);
 		con.print(2, y, "%c%c%c (%c) %s", TCOD_COLCTRL_1, actor->ch, TCOD_COLCTRL_STOP, shortcut, actor->name);
 		y++;
 		shortcut++;
