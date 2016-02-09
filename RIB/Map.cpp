@@ -47,9 +47,9 @@ public:
 			//									//
 			//			   ____2___				//
 			//			  |        |			//
-			//			  |		   |			//
+			//			  |	       |			//
 			//			1 |        | 3			//
-			//			  |		   |			//
+			//			  |	       |			//
 			//			  |________|			//
 			//				   4				//
 			//									//
@@ -85,7 +85,8 @@ public:
 				doorCh = DOOR_HORIZ;
 				break;
 			}
-			Actor *doorObj = new Actor(doorX, doorY, doorCh, "Door", TCODColor::darkerSepia);
+			Actor *doorObj = new Actor(doorX, doorY, doorCh, "Door", TCODColor::brass);
+			map.map->setProperties(doorX, doorY, false, true);
 			doorObj->destructible = new ObjectDestructible(3, 3, "broken door", '}');
 			engine.actors.push(doorObj);
 
@@ -108,6 +109,11 @@ Map::Map(int width, int height) : width(width), height(height) {
 Map::~Map() {
 	delete [] tiles;
 	delete map;
+}
+
+void Map::setTransparency(int x, int y, bool transp) {
+	bool walkbl = map->isWalkable(x, y);
+	map->setProperties(x, y, transp, walkbl);
 }
 
 void Map::addItem(int x, int y) {

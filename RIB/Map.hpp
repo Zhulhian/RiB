@@ -20,6 +20,8 @@ public :
 	bool isInFov(int x, int y) const;
 	bool isExplored(int x, int y) const;
 
+	void setTransparency(int x, int y, bool transp);
+
 	void computeFov();
 	void render() const;
 protected :

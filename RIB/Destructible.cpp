@@ -70,5 +70,6 @@ void PlayerDestructible::die(Actor *owner) {
 
 void ObjectDestructible::die(Actor *owner) {
 	engine.gui->message(TCODColor::sepia, "The %s breaks.", owner->name);
+	engine.map->setTransparency(owner->x, owner->y, true);
 	Destructible::die(owner);
 }

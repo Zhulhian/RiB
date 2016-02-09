@@ -4,6 +4,7 @@ Engine::Engine(int screenWidth, int screenHeight) : gameStatus(STARTUP), fovRadi
 	screenWidth(screenWidth), screenHeight(screenHeight) {
 	TCODConsole::setCustomFont("terminal16x16_gs_ro.png", TCOD_FONT_LAYOUT_ASCII_INROW | TCOD_FONT_TYPE_GRAYSCALE);
 	TCODConsole::initRoot(screenWidth, screenHeight, "TelOps", false);
+
 	
 	player = new Actor(40, 25, '@', "Player", TCODColor::darkerGrey);
 	player->destructible = new PlayerDestructible(30, 2, "Your corpse", '%');

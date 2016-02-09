@@ -168,7 +168,7 @@ void Gui::renderMouseLook() {
 				first = false;
 			}
 			strcat(buf, actor->name);
-			mouseTargetColor = actor->colFg;
+			mouseTargetColor = actor->colFg * 1.3f;
 		}
 	}
 	

@@ -89,7 +89,7 @@ Actor *PlayerAi::choseFromInventory(Actor *owner) {
 	static TCODConsole con(INVENTORY_WIDTH, INVENTORY_HEIGHT);
 
 	// Draw inventory frame
-	con.setDefaultForeground(TCODColor::amber);
+	con.setDefaultForeground(TCODColor::azure);
 	con.printFrame(0, 0, INVENTORY_WIDTH, INVENTORY_HEIGHT, true,
 		TCOD_BKGND_DEFAULT, " I N V E N T O R Y ");
 
@@ -122,26 +122,29 @@ Actor *PlayerAi::choseFromInventory(Actor *owner) {
 }
 
 void PlayerAi::showHelp() {
-	static int HELP_WIDTH = 40;
+	static int HELP_WIDTH = 41;
 	static int HELP_HEIGHT = engine.screenHeight - 30;
 
 	static TCODConsole help(HELP_WIDTH, HELP_HEIGHT);
 
-	help.setDefaultForeground(TCODColor::amber);
+	help.setDefaultForeground(TCODColor::lighterGreen);
 	help.printFrame(0, 0, HELP_WIDTH, HELP_HEIGHT, true, TCOD_BKGND_DEFAULT, " H E L P ");
 
 	TCODList<char *> helpMessages;
 	helpMessages.push(" M O V E M E N T ");
 	helpMessages.push("");
-	helpMessages.push("    7   8   9");
+	helpMessages.push("7   8   9");
 	helpMessages.push(""); 
-	helpMessages.push("      \\ | / ");
+	helpMessages.push("  \\ | / ");
 	helpMessages.push("");
-	helpMessages.push("    4 - 5 - 6");
+	helpMessages.push("4 - 5 - 6");
 	helpMessages.push("");
-	helpMessages.push("      / | \\ ");
+	helpMessages.push("  / | \\ ");
 	helpMessages.push("");
-	helpMessages.push("    1   2   3");
+	helpMessages.push("1   2   3");
+	helpMessages.push("");
+	helpMessages.push("");
+	helpMessages.push("\352");
 	helpMessages.push("");
 	helpMessages.push("");
 	helpMessages.push("5 / space : Wait a turn.");
@@ -154,15 +157,20 @@ void PlayerAi::showHelp() {
 	helpMessages.push("");
 	helpMessages.push("? : show this helpscreen.");
 	helpMessages.push("");
-	helpMessages.push("Press any key quit this helpscreen");
 
-	help.setDefaultForeground(TCODColor::lighterGreen);
 	int y = 2;
+	int x = HELP_WIDTH / 2;
+	TCOD_alignment_t alignment = TCOD_CENTER;
 
 	for (char* msg : helpMessages) {
-		help.print(2, y, msg);
+		help.printEx(x, y, TCOD_BKGND_DEFAULT, alignment, msg);
+		if (msg[0] == '\352') {
+			alignment = TCOD_LEFT;
+			x = 2;
+		}
 		y++;
 	}
+	help.printEx(HELP_WIDTH / 2, HELP_HEIGHT - 3, TCOD_BKGND_DEFAULT, TCOD_CENTER, "Press any key to exit");
 
 	TCODConsole::blit(&help, 0, 0, HELP_WIDTH, HELP_HEIGHT,
 		TCODConsole::root, engine.screenWidth / 2 - HELP_WIDTH / 2,
